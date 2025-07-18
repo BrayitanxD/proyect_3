@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Llamadas - Fallos y Problemas</title>
+    <style>
+        /* Estilos CSS (se mantienen los mismos que antes, solo añade las reglas para la alerta personalizada) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 4px solid #5a67d8;
+        }
+
+        .form-section h3 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-row.single {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group label.required::after {
+            content: " *";
+            color: #e53e3e;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #5a67d8;
+            box-shadow: 0 0 0 3px rgba(90, 103, 216, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .priority-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .priority-option {
+            display: flex;
+            flex-direction: column; /* Added for better alignment of text and small tag */
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .priority-option:hover {
+            border-color: #cbd5e0;
+        }
+
+        .priority-option.critical {
+            background: #fed7d7;
+            border-color: #fc8181;
+            color: #c53030;
+        }
+
+        .priority-option.high {
+            background: #feebc8;
+            border-color: #f6ad55;
+            color: #c05621;
+        }
+
+        .priority-option.medium {
+            background: #fefcbf;
+            border-color: #f6e05e;
+            color: #975a16;
+        }
+
+        .priority-option.low {
+            background: #c6f6d5;
+            border-color: #68d391;
+            color: #2f855a;
+        }
+
+        .priority-option.selected {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #e6fffa;
+            color: #234e52;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #38b2ac;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #5a67d8, #667eea);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4c51bf, #5a67d8);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(90, 103, 216, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+        }
+
+        .call-info {
+            background: linear-gradient(135deg, #e6fffa, #b2f5ea);
+            border: 1px solid #81e6d9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .call-info h4 {
+            color: #234e52;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .call-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .call-detail {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #b2f5ea;
+        }
+
+        .call-detail strong {
+            color: #2d3748;
+            font-size: 13px;
+        }
+
+        .call-detail span {
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .attachment-zone {
+            border: 2px dashed #cbd5e0;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: #f7fafc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .attachment-zone:hover {
+            border-color: #5a67d8;
+            background: #edf2f7;
+        }
+
+        .attachment-zone.dragover {
+            border-color: #5a67d8;
+            background: #e6f3ff;
+        }
+
+        .saved-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .saved-notification.show {
+            transform: translateX(0);
+        }
+
+        /* Estilos para la alerta personalizada */
+        .custom-alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .custom-alert-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .custom-alert-box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            position: relative; /* Para el icono de cierre */
+        }
+
+        .custom-alert-overlay.show .custom-alert-box {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .custom-alert-box h4 {
+            font-size: 1.8em;
+            color: #2d3748;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .custom-alert-box p {
+            font-size: 1.1em;
+            color: #4a5568;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .custom-alert-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .custom-alert-buttons .btn {
+            padding: 12px 25px;
+            font-size: 15px;
+        }
+
+        .custom-alert-buttons .btn-confirm {
+            background: #48bb78; /* Color verde para confirmar */
+            color: white;
+        }
+
+        .custom-alert-buttons .btn-confirm:hover {
+            background: #38a169;
+        }
+
+        .custom-alert-buttons .btn-cancel {
+            background: #edf2f7;
+            color: #4a5568;
+            border: 2px solid #cbd5e0;
+        }
+
+        .custom-alert-buttons .btn-cancel:hover {
+            background: #e2e8f0;
+        }
+
+        /* Estilos para el campo honeypot */
+        .honeypot-field {
+            position: absolute;
+            left: -9999px; /* Mueve el campo fuera de la vista */
+            opacity: 0;
+            height: 0;
+            width: 0;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .priority-selector {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                justify-content: center;
+            }
+            .custom-alert-box {
+                padding: 20px;
+            }
+            .custom-alert-box h4 {
+                font-size: 1.5em;
+            }
+            .custom-alert-box p {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📞 Reporte de Llamadas</h1>
+            <p>Sistema de registro de fallos, daños y problemas técnicos</p>
+        </div>
+
+        <div class="form-container">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                Llamada en curso - Registrando incidencia
+            </div>
+
+            <form id="callReportForm" action="procesar_reporte.php" method="POST" enctype="multipart/form-data">
+                <div class="honeypot-field">
+                    <label for="email_hp">No rellenes este campo</label>
+                    <input type="text" id="email_hp" name="email_hp">
+                </div>
+
+                <div class="call-info">
+                    <h4>📋 Información de la Llamada</h4>
+                    <div class="call-details">
+                        <div class="call-detail">
+                            <strong>Hora de inicio:</strong><br>
+                            <span id="callStartTime"></span>
+                            <input type="hidden" name="callStartTime" id="hiddenCallStartTime">
+                        </div>
+                        <div class="call-detail">
+                            <strong>Operador:</strong><br>
+                            <span id="operatorName">Juan Pérez</span>
+                            <input type="hidden" name="operatorName" id="hiddenOperatorName" value="Juan Pérez">
+                        </div>
+                        <div class="call-detail">
+                            <strong>ID de llamada:</strong><br>
+                            <span id="callId"></span>
+                            <input type="hidden" name="callId" id="hiddenCallId">
+                        </div>
+                        <div class="call-detail">
+                            <strong>Duración:</strong><br>
+                            <span id="callDuration">00:00:00</span>
+                            <input type="hidden" name="callDuration" id="hiddenCallDuration">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>👤 Datos del Cliente</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerName" class="required">Nombre Completo</label>
+                            <input type="text" id="customerName" name="customerName" required oninput="toUppercaseInput(this); validateTextInput(this);">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerPhone" class="required">Teléfono</label>
+                            <input type="tel" id="customerPhone" name="customerPhone" required oninput="validatePhoneInput(this);">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerEmail">Email</label>
+                            <input type="email" id="customerEmail" name="customerEmail" oninput="validateEmailInput(this);">
+                        </div>
+                        <div class="form-group">
+                            <label for="customerID">ID Cliente / Contrato</label>
+                            <input type="text" id="customerID" name="customerID" oninput="toUppercaseInput(this); validateTextInput(this);">
+                        </div>
+                    </div>
+                    <div class="form-row single">
+                        <div class="form-group">
+                            <label for="customerAddress">Dirección</label>
+                            <input type="text" id="customerAddress" name="customerAddress" oninput="toUppercaseInput(this); validateAddressInput(this);">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>⚠️ Información del Problema</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="problemType" class="required">Tipo de Problema</label>
+                            <select id="problemType" name="problemType" required>
+                                <option value="">Seleccionar tipo...</option>
+                                <option value="fallo_tecnico">Fallo Técnico</option>
+                                <option value="daño_fisico">Daño Físico</option>
+                                <option value="mal_funcionamiento">Mal Funcionamiento</option>
+                                <option value="interrupcion_servicio">Interrupción de Servicio</option>
+                                <option value="problema_red">Problema de Red</option>
+                                <option value="falla_electrica">Falla Eléctrica</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="affectedService" class="required">Servicio Afectado</label>
+                            <select id="affectedService" name="affectedService" required>
+                                <option value="">Seleccionar servicio...</option>
+                                <option value="internet">Internet</option>
+                                <option value="telefonia">Telefonía</option>
+                                <option value="television">Televisión</option>
+                                <option value="fibra_optica">Fibra Óptica</option>
+                                <option value="wifi">WiFi</option>
+                                <option value="email">Email</option>
+                                <option value="aplicacion">Aplicación</option>
+                                <option value="otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="problemDate" class="required">Fecha del Problema</label>
+                            <input type="datetime-local" id="problemDate" name="problemDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="problemLocation">Ubicación del Problema</label>
+                            <input type="text" id="problemLocation" name="problemLocation" placeholder="Ej: Oficina, Casa, Planta 2" oninput="toUppercaseInput(this); validateTextInput(this);">
+                        </div>
+                    </div>
+
+                    <div class="form-row single">
+                        <div class="form-group">
+                            <label for="problemDescription" class="required">Descripción Detallada</label>
+                            <textarea id="problemDescription" name="problemDescription" required 
+                                        placeholder="Describe detalladamente el problema reportado por el cliente..." oninput="toUppercaseInput(this); validateDescriptionInput(this);"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🚨 Prioridad del Caso</h3>
+                    <div class="form-group">
+                        <label class="required">Selecciona la prioridad según la gravedad del problema</label>
+                        <div class="priority-selector">
+                            <div class="priority-option critical" data-priority="critica">
+                                🔴 CRÍTICA<br>
+                                <small>Servicio inoperante</small>
+                            </div>
+                            <div class="priority-option high" data-priority="alta">
+                                🟡 ALTA<br>
+                                <small>Afecta funcionamiento</small>
+                            </div>
+                            <div class="priority-option medium" data-priority="media">
+                                🟠 MEDIA<br>
+                                <small>Problema intermitente</small>
+                            </div>
+                            <div class="priority-option low" data-priority="baja">
+                                🟢 BAJA<br>
+                                <small>Molestia menor</small>
+                            </div>
+                        </div>
+                        <input type="hidden" id="priority" name="priority" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>🔧 Acciones Inmediatas</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="immediateAction">Acción Tomada</label>
+                            <select id="immediateAction" name="immediateAction">
+                                <option value="">Seleccionar acción...</option>
+                                <option value="reinicio_equipo">Reinicio de Equipo</option>
+                                <option value="verificacion_cables">Verificación de Cables</option>
+                                <option value="reinicio_router">Reinicio de Router</option>
+                                <option value="cambio_configuracion">Cambio de Configuración</option>
+                                <option value="escalamiento_tecnico">Escalamiento Técnico</option>
+                                <option value="programar_visita">Programar Visita Técnica</option>
+                                <option value="ninguna">Ninguna</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="nextStep">Próximo Paso</label>
+                            <select id="nextStep" name="nextStep">
+                                <option value="">Seleccionar...</option>
+                                <option value="seguimiento_24h">Seguimiento en 24h</option>
+                                <option value="visita_tecnica">Visita Técnica</option>
+                                <option value="llamada_confirmacion">Llamada de Confirmación</option>
+                                <option value="escalamiento_supervisor">Escalamiento a Supervisor</option>
+                                <option value="cierre_caso">Cierre de Caso</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row single">
+                        <div class="form-group">
+                            <label for="technicalNotes">Notas Técnicas</label>
+                            <textarea id="technicalNotes" name="technicalNotes" 
+                                        placeholder="Detalles técnicos adicionales, diagnóstico inicial, etc." oninput="toUppercaseInput(this); validateDescriptionInput(this);"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>📎 Archivos Adjuntos</h3>
+                    <div class="attachment-zone" id="attachmentZone">
+                        <p>🔄 Arrastra archivos aquí o haz clic para seleccionar</p>
+                        <small>Fotos, capturas de pantalla, documentos (máx. 10MB)</small>
+                        <input type="file" id="attachments" name="attachments[]" multiple style="display: none;" accept="image/*,.pdf,.doc,.docx">
+                    </div>
+                    <div id="attachmentList" style="margin-top: 15px;"></div>
+                </div>
+
+                <div class="actions">
+                    <button type="button" class="btn btn-secondary" onclick="saveDraft()">
+                        💾 Guardar Borrador
+                    </button>
+                    <button type="button" class="btn btn-primary" id="submitFormButton">
+                        ✅ Registrar Reporte
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="saved-notification" id="savedNotification">
+        ✅ Reporte guardado correctamente
+    </div>
+
+    <div class="custom-alert-overlay" id="customAlertOverlay">
+        <div class="custom-alert-box">
+            <h4><span role="img" aria-label="confirm-icon">🚀</span> ¿Confirmar Envío?</h4>
+            <p>Estás a punto de registrar el reporte. ¿Estás seguro de que todos los datos son correctos?</p>
+            <div class="custom-alert-buttons">
+                <button type="button" class="btn btn-confirm" id="confirmSubmit">
+                    Confirmar Envío
+                </button>
+                <button type="button" class="btn btn-cancel" onclick="hideCustomAlert()">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inicializar datos de la llamada
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const callStartTimeStr = now.toLocaleString();
+            const callIdVal = 'CLL-' + now.getTime().toString().slice(-6) + Math.floor(Math.random() * 100); // Añadir random para mayor unicidad
+            const problemDateVal = now.toISOString().slice(0, 16);
+
+            document.getElementById('callStartTime').textContent = callStartTimeStr;
+            document.getElementById('hiddenCallStartTime').value = callStartTimeStr; // Pasa el valor al campo oculto
+            document.getElementById('callId').textContent = callIdVal;
+            document.getElementById('hiddenCallId').value = callIdVal; // Pasa el valor al campo oculto
+            document.getElementById('problemDate').value = problemDateVal;
+            document.getElementById('hiddenOperatorName').value = document.getElementById('operatorName').textContent;
+
+            // Iniciar contador de duración
+            startCallTimer();
+
+            // Asignar evento al botón de envío para mostrar la alerta personalizada
+            document.getElementById('submitFormButton').addEventListener('click', function(event) {
+                // Prevenir el envío automático del formulario
+                event.preventDefault(); 
+                
+                // Validar campos obligatorios de HTML5 antes de mostrar la alerta
+                if (!document.getElementById('callReportForm').checkValidity()) {
+                    // Si hay campos HTML5 no válidos, el navegador mostrará sus mensajes de error.
+                    // Podemos añadir una pequeña alerta aquí para el usuario si es necesario.
+                    showNotification('Por favor, completa todos los campos obligatorios.', 'error');
+                    // Simular el envío para que el navegador muestre los errores de validación nativos
+                    document.getElementById('callReportForm').reportValidity(); 
+                    return;
+                }
+
+                // Validar que se haya seleccionado prioridad
+                if (!document.getElementById('priority').value) {
+                    showNotification('Por favor, selecciona la prioridad del caso.', 'error');
+                    return;
+                }
+
+                // Validar honeypot antes de mostrar la alerta
+                const honeypotField = document.getElementById('email_hp');
+                if (honeypotField.value !== '') {
+                    // Si el honeypot tiene un valor, es probable que sea un bot. Bloquear envío.
+                    console.warn('Posible actividad de bot detectada. Envío bloqueado.');
+                    // Podrías redirigir o mostrar un mensaje genérico para no alertar al bot
+                    showNotification('Error al procesar el formulario. Inténtalo de nuevo.', 'error');
+                    return;
+                }
+
+                showCustomAlert();
+            });
+
+            // Asignar evento al botón de confirmar dentro de la alerta
+            document.getElementById('confirmSubmit').addEventListener('click', function() {
+                hideCustomAlert(); // Ocultar la alerta
+                // Ahora sí, enviar el formulario programáticamente
+                document.getElementById('callReportForm').submit();
+                showNotification('Enviando reporte...', 'info'); // Opcional: mostrar un mensaje mientras se envía
+            });
+        });
+
+        // Contador de duración de llamada
+        let callStartTime = new Date();
+        function startCallTimer() {
+            setInterval(function() {
+                const now = new Date();
+                const duration = Math.floor((now - callStartTime) / 1000);
+                const hours = Math.floor(duration / 3600).toString().padStart(2, '0');
+                const minutes = Math.floor((duration % 3600) / 60).toString().padStart(2, '0');
+                const seconds = (duration % 60).toString().padStart(2, '0');
+                const durationStr = `${hours}:${minutes}:${seconds}`;
+                document.getElementById('callDuration').textContent = durationStr;
+                document.getElementById('hiddenCallDuration').value = durationStr; // Pasa el valor al campo oculto
+            }, 1000);
+        }
+
+        // --- Funciones de Validación de Entrada (del lado del cliente) ---
+        // Convierte el texto a mayúsculas
+        function toUppercaseInput(input) {
+            input.value = input.value.toUpperCase();
+        }
+
+        // Valida texto general (nombre, id, ubicación) - permite letras, números, espacios y algunos símbolos específicos
+        function validateTextInput(input) {
+            const regex = /^[A-Z0-9 .,#'\(\)-]*$/; // Mayúsculas, números, espacio, punto, coma, almohadilla, apóstrofe, paréntesis, guion
+            if (!regex.test(input.value)) {
+                input.value = input.value.replace(/[^A-Z0-9 .,#'\(\)-]/g, '');
+            }
+        }
+
+        // Valida número de teléfono (solo números, espacios, guiones y paréntesis)
+        function validatePhoneInput(input) {
+            const regex = /^[0-9 \-()]*$/; // Números, espacio, guion, paréntesis
+            if (!regex.test(input.value)) {
+                input.value = input.value.replace(/[^0-9 \-()]/g, '');
+            }
+        }
+
+        // Valida email (HTML5 type="email" ya hace validación básica, pero se puede añadir más aquí si es necesario)
+        function validateEmailInput(input) {
+            // No se hace un reemplazo aquí, se confía en la validación nativa del 'type="email"'
+            // y la validación final en el servidor.
+        }
+
+        // Valida dirección (permite un rango más amplio de caracteres para calles, números, etc.)
+        function validateAddressInput(input) {
+            const regex = /^[A-Z0-9 .,#\-\/()áéíóúÁÉÍÓÚñÑüÜ]*$/; // Letras, números, espacios, .,#, -, /, (), vocales acentuadas, ñ
+            if (!regex.test(input.value)) {
+                input.value = input.value.replace(/[^A-Z0-9 .,#\-\/()áéíóúÁÉÍÓÚñÑüÜ]/g, '');
+            }
+        }
+
+        // Valida descripción (permite casi cualquier carácter, ya que son descripciones libres, 
+        // la sanización real se hace en PHP)
+        function validateDescriptionInput(input) {
+            // No se hace una restricción fuerte aquí. Se confía en el saneamiento del servidor (PHP).
+            // Si se quiere restringir caracteres muy exóticos o emojis, se podría añadir regex.
+            // Ejemplo para quitar caracteres no ASCII básicos, pero no es recomendable para descripciones libres:
+            // input.value = input.value.replace(/[^\x00-\x7F]/g, ''); 
+        }
+
+        // Manejo de selección de prioridad
+        document.querySelectorAll('.priority-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.priority-option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                document.getElementById('priority').value = this.dataset.priority;
+            });
+        });
+
+        // Manejo de archivos adjuntos
+        const attachmentZone = document.getElementById('attachmentZone');
+        const attachmentInput = document.getElementById('attachments');
+        const attachmentList = document.getElementById('attachmentList');
+
+        attachmentZone.addEventListener('click', () => attachmentInput.click());
+
+        attachmentZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            attachmentZone.classList.add('dragover');
+        });
+
+        attachmentZone.addEventListener('dragleave', () => {
+            attachmentZone.classList.remove('dragover');
+        });
+
+        attachmentZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            attachmentZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        attachmentInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function handleFiles(files) {
+            // Limpiar la lista actual para no duplicar si se añaden de nuevo
+            attachmentList.innerHTML = ''; 
+            Array.from(files).forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 10px;
+                    background: #f0f4f8;
+                    border-radius: 6px;
+                    margin-bottom: 8px;
+                `;
+                
+                const fileIcon = file.type.startsWith('image/') ? '🖼️' : '📄';
+                const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                
+                fileItem.innerHTML = `
+                    <span>${fileIcon}</span>
+                    <span style="flex: 1; color: #2d3748;">${file.name}</span>
+                    <span style="color: #718096; font-size: 12px;">${fileSize} MB</span>
+                    <button type="button" onclick="this.parentElement.remove()" 
+                            style="background: #e53e3e; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer;">✕</button>
+                `;
+                
+                attachmentList.appendChild(fileItem);
+            });
+        }
+
+        // Función para guardar borrador (solo localmente, no envía al servidor)
+        function saveDraft() {
+            const formData = new FormData(document.getElementById('callReportForm'));
+            const draftData = {};
+            for (let [key, value] of formData.entries()) {
+                if (key !== 'attachments[]' && key !== 'email_hp') { // No guardar archivos ni honeypot
+                    draftData[key] = value;
+                }
+            }
+            // Incluir los campos de info de llamada que no son parte de formData.entries() directamente
+            draftData.callStartTime = document.getElementById('callStartTime').textContent;
+            draftData.callDuration = document.getElementById('callDuration').textContent;
+            draftData.callId = document.getElementById('callId').textContent;
+            draftData.operatorName = document.getElementById('operatorName').textContent;
+            
+            localStorage.setItem('callReportDraft', JSON.stringify(draftData));
+            
+            showNotification('💾 Borrador guardado correctamente');
+        }
+
+        // Función para mostrar notificaciones (añadido tipo de notificación)
+        function showNotification(message, type = 'success') { // 'success', 'error', 'info'
+            const notification = document.getElementById('savedNotification');
+            notification.textContent = message;
+            
+            // Remover clases anteriores y añadir la nueva
+            notification.classList.remove('success', 'error', 'info');
+            notification.style.backgroundColor = ''; // Reset background
+            
+            if (type === 'error') {
+                notification.style.backgroundColor = '#e53e3e';
+            } else if (type === 'info') {
+                notification.style.backgroundColor = '#3182ce';
+            } else { // default 'success'
+                notification.style.backgroundColor = '#48bb78';
+            }
+
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Funciones para la alerta personalizada
+        function showCustomAlert() {
+            document.getElementById('customAlertOverlay').classList.add('show');
+        }
+
+        function hideCustomAlert() {
+            document.getElementById('customAlertOverlay').classList.remove('show');
+        }
+
+        // Cargar borrador si existe
+        window.addEventListener('load', function() {
+            const draft = localStorage.getItem('callReportDraft');
+            if (draft) {
+                const draftData = JSON.parse(draft);
+                Object.keys(draftData).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        element.value = draftData[key];
+                    }
+                    // Restaurar los valores de los span y hidden inputs
+                    if (key === 'callStartTime') document.getElementById('callStartTime').textContent = draftData[key];
+                    if (key === 'callDuration') document.getElementById('callDuration').textContent = draftData[key];
+                    if (key === 'callId') document.getElementById('callId').textContent = draftData[key];
+                    if (key === 'operatorName') document.getElementById('operatorName').textContent = draftData[key];
+                });
+
+                // Restaurar la selección de prioridad visualmente
+                const selectedPriority = document.getElementById('priority').value;
+                if (selectedPriority) {
+                    const priorityOption = document.querySelector(`.priority-option[data-priority="${selectedPriority}"]`);
+                    if (priorityOption) {
+                        document.querySelectorAll('.priority-option').forEach(opt => opt.classList.remove('selected'));
+                        priorityOption.classList.add('selected');
+                    }
+                }
+
+                showNotification('📋 Borrador cargado automáticamente', 'info');
+            }
+            
+            // Verificar si hay un status en la URL después de un envío
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            const reportId = urlParams.get('report_id');
+
+            if (status === 'success') {
+                showNotification(`✅ Reporte #${reportId} registrado con éxito.`, 'success');
+                // Limpiar el borrador si el envío fue exitoso
+                localStorage.removeItem('callReportDraft');
+            } else if (status === 'error') {
+                const errorMessage = urlParams.get('message') || 'Hubo un error al registrar el reporte.';
+                showNotification(`❌ Error: ${decodeURIComponent(errorMessage)}`, 'error');
+            }
+        });
+    </script>
+</body>
+</html>
